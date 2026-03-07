@@ -68,7 +68,80 @@ export const copy = {
     noAccount: "এখনও অ্যাকাউন্ট নেই?",
     goToSignup: "সাইন আপ করুন",
     close: "বন্ধ",
-    footer: "Mess Manager - আপনার হোস্টেল হিসাবের নির্ভরযোগ্য সঙ্গী",
+    advantagesBadge: "Melager এর বিশেষ সুবিধা",
+    advantagesTitle: "কেন মেস ম্যানেজাররা Melager ব্যবহার করে",
+    advantagesDescription:
+      "প্রতিদিনের হিসাবকে দ্রুত, নির্ভুল এবং স্বচ্ছ করতে প্রয়োজনীয় সব টুল একটি প্ল্যাটফর্মে।",
+    advantagesCards: [
+      {
+        icon: "activity",
+        title: "অটোমেটেড মিল ও খরচ হিসাব",
+        description: "দৈনিক মিল ও বাজার এন্ট্রি থেকে মাসিক ব্যালেন্স স্বয়ংক্রিয়ভাবে তৈরি হয়।",
+        points: ["ম্যানুয়াল ভুল কমে যায়", "প্রতিটি সদস্যের হিসাব তাৎক্ষণিক আপডেট"],
+      },
+      {
+        icon: "layers",
+        title: "এক প্ল্যাটফর্মে সব মডিউল",
+        description: "মিল, বাজার, মেম্বার ম্যানেজমেন্ট, রিপোর্ট এবং সেটিংস এক জায়গায়।",
+        points: ["আলাদা শিট বা টুলের প্রয়োজন নেই", "নতুন সদস্য অনবোর্ডিং দ্রুত"],
+      },
+      {
+        icon: "users",
+        title: "টিম ট্রান্সপারেন্সি",
+        description: "সব সদস্য নিজ নিজ ব্যালেন্স এবং আপডেট দেখতে পারে রিয়েলটাইমে।",
+        points: ["ভুল বোঝাবুঝি কমে", "দায়িত্ব বণ্টন স্পষ্ট হয়"],
+      },
+      {
+        icon: "chart",
+        title: "ডেটা-ড্রিভেন রিপোর্টিং",
+        description: "মাসিক সারাংশ, খরচ বিশ্লেষণ এবং দ্রুত সিদ্ধান্তের জন্য ইনসাইট।",
+        points: ["খরচ ট্রেন্ড সহজে বোঝা যায়", "পরবর্তী মাসের পরিকল্পনা সহজ হয়"],
+      },
+      {
+        icon: "activity",
+        title: "রিয়েলটাইম নোটিফিকেশন",
+        description: "মিল এন্ট্রি, খরচ আপডেট বা গুরুত্বপূর্ণ পরিবর্তনের সাথে সাথে নোটিফিকেশন পান।",
+        points: ["দ্রুত সিদ্ধান্ত নেয়া যায়", "সব সদস্য আপডেটেড থাকে"],
+      },
+      {
+        icon: "layers",
+        title: "সিকিউর ও স্কেলেবল আর্কিটেকচার",
+        description: "বৃদ্ধির সাথে তাল মিলিয়ে ডাটা সুরক্ষা ও পারফরম্যান্স বজায় রাখে।",
+        points: ["রোল-ভিত্তিক এক্সেস প্রস্তুত", "দীর্ঘমেয়াদে নির্ভরযোগ্য পারফরম্যান্স"],
+      },
+    ],
+    footer: "Melager - আপনার হোস্টেল হিসাবের নির্ভরযোগ্য সঙ্গী",
+    footerBrandDescription:
+      "মেস ম্যানেজারদের জন্য স্মার্ট প্ল্যাটফর্ম - মিল, বাজার, বকেয়া ও রিপোর্ট একসাথে ম্যানেজ করুন।",
+    footerQuickLinksTitle: "দ্রুত লিংক",
+    footerContactTitle: "যোগাযোগ",
+    footerAddress: "ধানমন্ডি, ঢাকা, বাংলাদেশ",
+    footerPhone: "+880 1712 345678",
+    footerEmail: "support@melager.com",
+    footerNewsletterTitle: "আপডেট পেতে সাবস্ক্রাইব করুন",
+    footerNewsletterDesc: "নতুন ফিচার, আপডেট এবং টিপস সবার আগে পেতে ইমেইল দিন।",
+    footerNewsletterPlaceholder: "আপনার ইমেইল লিখুন",
+    developerTag: "ডেভেলপার টিম",
+    developerDrawerTitle: "Melager ডেভেলপার টিম",
+    developerDrawerSubTitle: "যারা প্ল্যাটফর্মটি তৈরি ও রক্ষণাবেক্ষণ করছে",
+    developerDrawerDescription:
+      "প্রোডাক্ট, ব্যাকএন্ড, ফ্রন্টএন্ড ও অপারেশন টিম সমন্বয়ে Melager ধারাবাহিকভাবে আপডেট ও উন্নত করা হচ্ছে।",
+    developerFarmName: "NovaNest IT Farm",
+    developerFarmTagline: "Product Engineering, Automation, and Scalable Web Systems",
+    developerFarmOverview:
+      "NovaNest IT Farm হল Melager-এর প্রযুক্তিগত পার্টনার, যারা প্ল্যাটফর্ম ডেভেলপমেন্ট, সিকিউরিটি, এবং পারফরম্যান্স অপ্টিমাইজেশনে কাজ করছে।",
+    developerFarmServices: [
+      "Full-stack web application development",
+      "Cloud deployment and infrastructure management",
+      "Realtime architecture and system optimization",
+      "Product maintenance and feature delivery",
+    ],
+    developerFarmWebsiteLabel: "ওয়েবসাইট",
+    developerFarmWebsite: "www.novanestit.com",
+    developerFarmContactLabel: "ইমেইল",
+    developerFarmContact: "contact@novanestit.com",
+    developerFooterNote: "টেকনিক্যাল সাপোর্টের জন্য: devsupport@melager.com",
+    footerBottom: "© 2026 Melager. সর্বস্বত্ব সংরক্ষিত।",
   },
   en: {
     lang: "English",
@@ -139,6 +212,104 @@ export const copy = {
     noAccount: "Don't have an account yet?",
     goToSignup: "Sign up",
     close: "Close",
-    footer: "Mess Manager - your trusted hostel accounting partner",
+    advantagesBadge: "Melager Advantages",
+    advantagesTitle: "Why Mess Managers Choose Melager",
+    advantagesDescription:
+      "Everything needed to keep daily operations fast, accurate, and transparent in one streamlined platform.",
+    advantagesCards: [
+      {
+        icon: "activity",
+        title: "Automated meal and cost calculations",
+        description:
+          "Daily meal and market entries automatically generate clean monthly balances.",
+        points: [
+          "Reduces manual mistakes significantly",
+          "Instantly updates member-wise accounting",
+        ],
+      },
+      {
+        icon: "layers",
+        title: "All modules in one workspace",
+        description:
+          "Manage meals, markets, members, reports, and settings from a single dashboard.",
+        points: [
+          "No need for scattered sheets or tools",
+          "Faster onboarding for new members",
+        ],
+      },
+      {
+        icon: "users",
+        title: "Team-wide transparency",
+        description:
+          "Members can view their balances and updates in real time with clear accountability.",
+        points: [
+          "Minimizes confusion and disputes",
+          "Clarifies responsibility across the mess",
+        ],
+      },
+      {
+        icon: "chart",
+        title: "Data-driven reporting",
+        description:
+          "Get monthly summaries and spending insights for smarter, faster decisions.",
+        points: [
+          "Understand cost trends quickly",
+          "Plan the next month with confidence",
+        ],
+      },
+      {
+        icon: "activity",
+        title: "Real-time notifications",
+        description:
+          "Get instant notifications for meal entries, expense updates, and important changes.",
+        points: [
+          "Enables faster decision making",
+          "Keeps all members aligned and informed",
+        ],
+      },
+      {
+        icon: "layers",
+        title: "Secure and scalable architecture",
+        description:
+          "Maintains data safety and performance as your mess operations continue to grow.",
+        points: [
+          "Ready for role-based access control",
+          "Reliable long-term performance",
+        ],
+      },
+    ],
+    footer: "Melager - your trusted hostel accounting partner",
+    footerBrandDescription:
+      "A smart platform for mess managers to handle meals, markets, balances, and reports from one dashboard.",
+    footerQuickLinksTitle: "Quick links",
+    footerContactTitle: "Contact",
+    footerAddress: "Dhanmondi, Dhaka, Bangladesh",
+    footerPhone: "+880 1712 345678",
+    footerEmail: "support@melager.com",
+    footerNewsletterTitle: "Subscribe for updates",
+    footerNewsletterDesc:
+      "Get product updates, new feature announcements, and practical tips directly in your inbox.",
+    footerNewsletterPlaceholder: "Enter your email",
+    developerTag: "Developer Team",
+    developerDrawerTitle: "Melager Developer Team",
+    developerDrawerSubTitle: "People building and maintaining this platform",
+    developerDrawerDescription:
+      "Melager is continuously improved by a collaborative product, backend, frontend, and operations team.",
+    developerFarmName: "NovaNest IT Farm",
+    developerFarmTagline: "Product Engineering, Automation, and Scalable Web Systems",
+    developerFarmOverview:
+      "NovaNest IT Farm is Melager's technology partner focused on platform development, security, and performance optimization.",
+    developerFarmServices: [
+      "Full-stack web application development",
+      "Cloud deployment and infrastructure management",
+      "Realtime architecture and system optimization",
+      "Product maintenance and feature delivery",
+    ],
+    developerFarmWebsiteLabel: "Website",
+    developerFarmWebsite: "www.novanestit.com",
+    developerFarmContactLabel: "Email",
+    developerFarmContact: "contact@novanestit.com",
+    developerFooterNote: "For technical support: devsupport@melager.com",
+    footerBottom: "© 2026 Melager. All rights reserved.",
   },
 };

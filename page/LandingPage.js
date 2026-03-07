@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import HeroSection from "@/components/landing/HeroSection";
+import AdvantagesSection from "@/components/landing/AdvantagesSection";
 import ForgotPasswordDrawer from "@/components/landing/ForgotPasswordDrawer";
 import LandingFooter from "@/components/landing/LandingFooter";
 import LandingNavbar from "@/components/landing/LandingNavbar";
@@ -69,6 +70,8 @@ export default function LandingPage() {
           onSearch={handleSearch}
         />
       </main>
+
+      <AdvantagesSection t={t} />
 
       <LandingFooter t={t} />
 
