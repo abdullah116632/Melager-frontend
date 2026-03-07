@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #f4efe5;
+  --color-paper: #fdf8ef;
+  --color-card: #fff8ee;
+  --color-ink: #102a43;
+  --color-muted: #5c6f82;
+  --color-brand: #0f766e;
+  --color-brand-strong: #0b5e57;
+  --color-accent: #ec9a1e;
+  --shadow-soft: 0 16px 44px rgba(15, 68, 102, 0.14);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-ink);
+  --font-sans: var(--font-manrope);
+  --font-bn: var(--font-hind-siliguri);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-ink);
+  font-family: var(--font-manrope), sans-serif;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(236, 154, 30, 0.22), transparent 30%),
+    radial-gradient(circle at 85% -5%, rgba(15, 118, 110, 0.22), transparent 35%),
+    var(--color-bg);
+}
+
+.font-bn {
+  font-family: var(--font-hind-siliguri), sans-serif;
+}
+
+.shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+      rgba(16, 42, 67, 0.03) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(16, 42, 67, 0.03) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.glass-card {
+  background: linear-gradient(170deg, rgba(255, 248, 238, 0.95), rgba(255, 244, 226, 0.88));
+  border: 1px solid rgba(16, 42, 67, 0.08);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(6px);
+}
+
+.chip {
+  border: 1px solid rgba(16, 42, 67, 0.16);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.fade-in-up {
+  animation: fade-in-up 520ms ease-out both;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
