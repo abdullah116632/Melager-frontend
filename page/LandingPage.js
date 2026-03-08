@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import HeroSection from "@/components/landing/HeroSection";
 import AdvantagesSection from "@/components/landing/AdvantagesSection";
 import ForgotPasswordDrawer from "@/components/landing/ForgotPasswordDrawer";
@@ -9,9 +11,18 @@ import LandingNavbar from "@/components/landing/LandingNavbar";
 import LoginDrawer from "@/components/landing/LoginDrawer";
 import SearchPanel from "@/components/landing/SearchPanel";
 import SignupDrawer from "@/components/landing/SignupDrawer";
+import VerifyOtpDrawer from "@/components/landing/VerifyOtpDrawer";
 import { copy, LANGUAGE_KEY } from "@/page/landingCopy";
 
 export default function LandingPage() {
+  const router = useRouter();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const [language, setLanguage] = useState(() => {
     if (typeof window === "undefined") {
       return "bn";
@@ -30,6 +41,8 @@ export default function LandingPage() {
   const [isSignupDrawerOpen, setIsSignupDrawerOpen] = useState(false);
   const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
   const [isForgotDrawerOpen, setIsForgotDrawerOpen] = useState(false);
+  const [isVerifyOtpDrawerOpen, setIsVerifyOtpDrawerOpen] = useState(false);
+  const [signupEmail, setSignupEmail] = useState("");
   const [query, setQuery] = useState("");
 
   const t = useMemo(() => copy[language], [language]);
@@ -48,15 +61,18 @@ export default function LandingPage() {
       <LandingNavbar
         t={t}
         language={language}
+        isAuthenticated={hasMounted && isAuthenticated}
         onLanguageChange={handleLanguage}
         onOpenLogin={() => {
           setIsSignupDrawerOpen(false);
           setIsForgotDrawerOpen(false);
+          setIsVerifyOtpDrawerOpen(false);
           setIsLoginDrawerOpen(true);
         }}
         onOpenSignup={() => {
           setIsLoginDrawerOpen(false);
           setIsForgotDrawerOpen(false);
+          setIsVerifyOtpDrawerOpen(false);
           setIsSignupDrawerOpen(true);
         }}
       />
@@ -82,7 +98,40 @@ export default function LandingPage() {
         onOpenLogin={() => {
           setIsSignupDrawerOpen(false);
           setIsForgotDrawerOpen(false);
+          setIsVerifyOtpDrawerOpen(false);
           setIsLoginDrawerOpen(true);
+        }}
+        onSignupSuccess={({ email, token }) => {
+          if (token) {
+            setIsSignupDrawerOpen(false);
+            setIsVerifyOtpDrawerOpen(false);
+            setIsLoginDrawerOpen(false);
+            setIsForgotDrawerOpen(false);
+            router.push("/manager/profile");
+            return;
+          }
+
+          setSignupEmail(email || "");
+          setIsSignupDrawerOpen(false);
+          setIsVerifyOtpDrawerOpen(true);
+        }}
+      />
+
+      <VerifyOtpDrawer
+        isOpen={isVerifyOtpDrawerOpen}
+        t={t}
+        defaultEmail={signupEmail}
+        onClose={() => setIsVerifyOtpDrawerOpen(false)}
+        onVerifySuccess={() => {
+          setIsVerifyOtpDrawerOpen(false);
+          setIsSignupDrawerOpen(false);
+          setIsLoginDrawerOpen(false);
+          setIsForgotDrawerOpen(false);
+          router.push("/manager/profile");
+        }}
+        onBackToSignup={() => {
+          setIsVerifyOtpDrawerOpen(false);
+          setIsSignupDrawerOpen(true);
         }}
       />
 
@@ -93,6 +142,7 @@ export default function LandingPage() {
         onOpenSignup={() => {
           setIsLoginDrawerOpen(false);
           setIsForgotDrawerOpen(false);
+          setIsVerifyOtpDrawerOpen(false);
           setIsSignupDrawerOpen(true);
         }}
         onOpenForgotPassword={() => {

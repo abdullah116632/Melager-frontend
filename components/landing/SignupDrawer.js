@@ -1,9 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FiX } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import ApiErrorAlert from "@/components/common/ApiErrorAlert";
+import {
+  clearAuthError,
+  clearAuthStatus,
+  registerUser,
+} from "@/store/slices/authSlice";
 
-export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
+export default function SignupDrawer({
+  isOpen,
+  t,
+  onClose,
+  onOpenLogin,
+  onSignupSuccess,
+}) {
+  const dispatch = useDispatch();
+  const { isLoading, error, registrationMessage } = useSelector((state) => state.auth);
+  const apiErrorRef = useRef(null);
+
   const [formData, setFormData] = useState({
     nameOfMess: "",
     phnNumber: "",
@@ -31,21 +48,87 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
     return "";
   }, [formData.password, formData.confirmPassword, t.passwordMismatch, t.passwordShort]);
 
+  const phoneError = useMemo(() => {
+    if (!formData.phnNumber) {
+      return "";
+    }
+
+    return /^\d{11}$/.test(formData.phnNumber) ? "" : t.phoneLengthError;
+  }, [formData.phnNumber, t.phoneLengthError]);
+
+  const emailError = useMemo(() => {
+    if (!formData.email) {
+      return "";
+    }
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      ? ""
+      : t.emailInvalidError;
+  }, [formData.email, t.emailInvalidError]);
+
   const handleFieldChange = (field, value) => {
+    if (error) {
+      dispatch(clearAuthError());
+    }
+
+    const nextValue =
+      field === "phnNumber" ? value.replace(/\D/g, "").slice(0, 11) : value;
+
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: nextValue,
     }));
   };
 
-  const handleSignupSubmit = (event) => {
+  const handleSignupSubmit = async (event) => {
     event.preventDefault();
+
+    if (passwordError || phoneError || emailError) {
+      return;
+    }
+
+    try {
+      const result = await dispatch(
+        registerUser({
+          nameOfMess: formData.nameOfMess.trim(),
+          phnNumber: formData.phnNumber.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        })
+      ).unwrap();
+
+      if (onSignupSuccess) {
+        onSignupSuccess({
+          email: result?.email || formData.email.trim(),
+          message: result?.message || "",
+          token: result?.token || null,
+        });
+      }
+    } catch {
+      // Error is handled by redux state and displayed in UI.
+    }
   };
+
+  const handleClose = () => {
+    dispatch(clearAuthStatus());
+    onClose();
+  };
+
+  const handleOpenLogin = () => {
+    dispatch(clearAuthStatus());
+    onOpenLogin();
+  };
+
+  useEffect(() => {
+    if (error && apiErrorRef.current) {
+      apiErrorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a4360] transition ${
           isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -66,7 +149,7 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={t.close}
             className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-[#102a4325] text-[var(--color-muted)] transition hover:bg-white"
           >
@@ -75,6 +158,10 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
         </div>
 
         <form onSubmit={handleSignupSubmit} className="mt-7 space-y-4">
+          <div ref={apiErrorRef}>
+            <ApiErrorAlert error={error} fallbackMessage={t.registrationFailed} />
+          </div>
+
           <label className="block text-sm">
             <span className="mb-1 block text-[var(--color-muted)]">{t.signupMessName}</span>
             <input
@@ -91,13 +178,23 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
             <span className="mb-1 block text-[var(--color-muted)]">{t.signupPhone}</span>
             <input
               type="tel"
+              inputMode="numeric"
               value={formData.phnNumber}
               onChange={(event) => handleFieldChange("phnNumber", event.target.value)}
               placeholder={t.signupPhonePlaceholder}
+              pattern="[0-9]{11}"
+              minLength={11}
+              maxLength={11}
               required
               className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
             />
           </label>
+
+          {phoneError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {phoneError}
+            </p>
+          ) : null}
 
           <label className="block text-sm">
             <span className="mb-1 block text-[var(--color-muted)]">{t.signupEmail}</span>
@@ -110,6 +207,12 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
               className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
             />
           </label>
+
+          {emailError ? (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {emailError}
+            </p>
+          ) : null}
 
           <label className="block text-sm">
             <span className="mb-1 block text-[var(--color-muted)]">{t.signupPassword}</span>
@@ -146,19 +249,24 @@ export default function SignupDrawer({ isOpen, t, onClose, onOpenLogin }) {
 
           <button
             type="submit"
-            disabled={!!passwordError}
-            className="mt-2 w-full cursor-pointer rounded-xl bg-[var(--color-brand)] px-4 py-3 font-semibold text-white transition hover:bg-[var(--color-brand-strong)]"
+            disabled={!!passwordError || !!phoneError || !!emailError || isLoading}
+            className="mt-2 w-full cursor-pointer rounded-xl bg-[var(--color-brand)] px-4 py-3 font-semibold text-white transition hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {t.formSubmit}
+            {isLoading ? t.signupSubmitting : t.formSubmit}
           </button>
 
+          {registrationMessage ? (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+              {registrationMessage}
+            </p>
+          ) : null}
           <p className="text-center text-xs text-[var(--color-muted)]">{t.signupSubmitHint}</p>
 
           <div className="pt-1 text-center text-sm text-[var(--color-muted)]">
             <span>{t.haveAccount} </span>
             <button
               type="button"
-              onClick={onOpenLogin}
+              onClick={handleOpenLogin}
               className="cursor-pointer font-semibold text-[var(--color-brand-strong)] underline decoration-transparent transition hover:decoration-current"
             >
               {t.goToLogin}

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import {
   FiCode,
@@ -24,15 +26,21 @@ export default function LandingFooter({ t }) {
       <div className="overflow-hidden rounded-3xl border border-[#102a4322] bg-[#fff7eaee] shadow-[0_24px_56px_rgba(16,42,67,0.12)]">
         <div className="grid gap-8 px-5 py-8 md:grid-cols-2 md:px-8 lg:grid-cols-4">
           <section>
-            <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--color-brand)] text-sm font-bold text-white">
-                ML
+            <Link href="/" className="flex cursor-pointer items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-white">
+                <Image
+                  src="/logo/logo2.png"
+                  alt="Melager footer logo"
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 scale-125 object-cover"
+                />
               </div>
               <div>
                 <h3 className="text-base font-bold text-[var(--color-ink)]">Melager</h3>
                 <p className="text-xs text-[var(--color-muted)]">{t.badge}</p>
               </div>
-            </div>
+            </Link>
 
             <p className="mt-4 text-sm leading-6 text-[var(--color-muted)]">
               {t.footerBrandDescription}

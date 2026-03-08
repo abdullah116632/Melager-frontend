@@ -1,5 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { loginApi, logoutApi, meApi, registerApi } from "@/services/authApi";
+import {
+  loginApi,
+  logoutApi,
+  registerApi,
+  resendRegistrationOtpApi,
+  verifyRegistrationOtpApi,
+} from "@/services/authApi";
 
 function readToken() {
   if (typeof window === "undefined") {
@@ -21,13 +27,34 @@ function clearToken() {
   }
 }
 
+function extractToken(response) {
+  return (
+    response?.data?.data?.token ||
+    response?.data?.token ||
+    response?.token ||
+    response?.accessToken ||
+    null
+  );
+}
+
+function extractManager(response) {
+  return (
+    response?.data?.data?.manager ||
+    response?.data?.manager ||
+    response?.data?.user ||
+    response?.manager ||
+    response?.user ||
+    null
+  );
+}
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload, { rejectWithValue }) => {
     try {
       const response = await loginApi(payload);
-      const token = response?.token || response?.accessToken;
-      const user = response?.user || null;
+      const token = extractToken(response);
+      const user = extractManager(response);
 
       if (token) {
         saveToken(token);
@@ -47,7 +74,19 @@ export const registerUser = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await registerApi(payload);
-      return response;
+      const token = extractToken(response);
+      const manager = extractManager(response);
+
+      if (token) {
+        saveToken(token);
+      }
+
+      return {
+        message: response?.message || "Registration successful. Please verify your OTP.",
+        email: manager?.email || payload?.email || "",
+        manager,
+        token,
+      };
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Registration failed."
@@ -56,15 +95,42 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const fetchCurrentUser = createAsyncThunk(
-  "auth/fetchCurrentUser",
-  async (_, { rejectWithValue }) => {
+export const verifyRegistrationOtp = createAsyncThunk(
+  "auth/verifyRegistrationOtp",
+  async (payload, { rejectWithValue }) => {
     try {
-      const response = await meApi();
-      return response?.user || response;
+      const response = await verifyRegistrationOtpApi(payload);
+      const token = extractToken(response);
+      const user = extractManager(response);
+
+      if (token) {
+        saveToken(token);
+      }
+
+      return {
+        token,
+        user,
+        message: response?.message || "Manager verified successfully",
+      };
     } catch (error) {
       return rejectWithValue(
-        error?.response?.data?.message || "Failed to fetch user profile."
+        error?.response?.data?.message || "OTP verification failed."
+      );
+    }
+  }
+);
+
+export const resendRegistrationOtp = createAsyncThunk(
+  "auth/resendRegistrationOtp",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await resendRegistrationOtpApi(payload);
+      return {
+        message: response?.message || "OTP sent successfully.",
+      };
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to resend OTP."
       );
     }
   }
@@ -92,6 +158,9 @@ const initialState = {
   isAuthenticated: !!readToken(),
   isLoading: false,
   error: null,
+  pendingVerificationEmail: null,
+  registrationMessage: null,
+  verifySuccessMessage: null,
 };
 
 const authSlice = createSlice({
@@ -101,12 +170,20 @@ const authSlice = createSlice({
     clearAuthError: (state) => {
       state.error = null;
     },
+    clearAuthStatus: (state) => {
+      state.error = null;
+      state.registrationMessage = null;
+      state.verifySuccessMessage = null;
+    },
     logoutLocal: (state) => {
       clearToken();
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
+      state.pendingVerificationEmail = null;
+      state.registrationMessage = null;
+      state.verifySuccessMessage = null;
     },
   },
   extraReducers: (builder) => {
@@ -114,12 +191,14 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.verifySuccessMessage = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAuthenticated = !!action.payload.token;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -128,27 +207,54 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.registrationMessage = null;
+        state.verifySuccessMessage = null;
       })
-      .addCase(registerUser.fulfilled, (state) => {
+      .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.pendingVerificationEmail = action.payload.email || null;
+        state.registrationMessage = action.payload.message || null;
+        state.token = action.payload.token || null;
+        state.user = action.payload.manager || null;
+        state.isAuthenticated = !!action.payload.token;
+        state.error = null;
+
+        if (action.payload.token) {
+          state.pendingVerificationEmail = null;
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || "Registration failed.";
       })
-      .addCase(fetchCurrentUser.pending, (state) => {
+      .addCase(verifyRegistrationOtp.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
+        state.verifySuccessMessage = null;
       })
-      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+      .addCase(verifyRegistrationOtp.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload;
-        state.isAuthenticated = true;
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.isAuthenticated = !!action.payload.token;
+        state.pendingVerificationEmail = null;
+        state.verifySuccessMessage = action.payload.message || null;
       })
-      .addCase(fetchCurrentUser.rejected, (state, action) => {
+      .addCase(verifyRegistrationOtp.rejected, (state, action) => {
         state.isLoading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-        state.error = action.payload || "User session expired.";
+        state.error = action.payload || "OTP verification failed.";
+      })
+      .addCase(resendRegistrationOtp.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendRegistrationOtp.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.registrationMessage = action.payload.message || "OTP sent successfully.";
+      })
+      .addCase(resendRegistrationOtp.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Failed to resend OTP.";
       })
       .addCase(logoutUser.pending, (state) => {
         state.isLoading = true;
@@ -159,6 +265,9 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+        state.pendingVerificationEmail = null;
+        state.registrationMessage = null;
+        state.verifySuccessMessage = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -166,9 +275,12 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = action.payload || null;
+        state.pendingVerificationEmail = null;
+        state.registrationMessage = null;
+        state.verifySuccessMessage = null;
       });
   },
 });
 
-export const { clearAuthError, logoutLocal } = authSlice.actions;
+export const { clearAuthError, clearAuthStatus, logoutLocal } = authSlice.actions;
 export default authSlice.reducer;

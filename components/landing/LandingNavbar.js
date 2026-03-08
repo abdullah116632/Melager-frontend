@@ -1,6 +1,11 @@
+import Image from "next/image";
+import Link from "next/link";
+import { FiUser } from "react-icons/fi";
+
 export default function LandingNavbar({
   t,
   language,
+  isAuthenticated,
   onLanguageChange,
   onOpenLogin,
   onOpenSignup,
@@ -8,9 +13,16 @@ export default function LandingNavbar({
   return (
     <header className="relative z-10 border-b border-[#102a4315] bg-[#fdf8efc9] backdrop-blur-sm">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--color-brand)] text-sm font-bold text-white">
-            MM
+        <Link href="/" className="flex cursor-pointer items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white">
+            <Image
+              src="/logo/logo1.png"
+              alt="Melager logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 scale-125 object-cover"
+              priority
+            />
           </div>
           <div>
             <p className="text-sm font-semibold tracking-wide text-[var(--color-brand-strong)]">
@@ -18,7 +30,7 @@ export default function LandingNavbar({
             </p>
             <p className="text-xs text-[var(--color-muted)]">{t.badge}</p>
           </div>
-        </div>
+        </Link>
 
         <div className="hidden items-center gap-7 text-sm font-semibold text-[var(--color-muted)] md:flex">
           <a href="#features" className="cursor-pointer transition hover:text-[var(--color-brand-strong)]">
@@ -58,21 +70,33 @@ export default function LandingNavbar({
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={onOpenLogin}
-            className="hidden cursor-pointer rounded-full border border-[#102a4325] px-4 py-2 text-sm font-semibold text-[var(--color-brand-strong)] transition hover:bg-white/70 sm:block"
-          >
-            {t.nav.login}
-          </button>
+          {isAuthenticated ? (
+            <Link
+              href="/manager/profile"
+              className="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+              aria-label="Go to profile"
+            >
+              <FiUser size={18} />
+            </Link>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={onOpenLogin}
+                className="hidden cursor-pointer rounded-full border border-[#102a4325] px-4 py-2 text-sm font-semibold text-[var(--color-brand-strong)] transition hover:bg-white/70 sm:block"
+              >
+                {t.nav.login}
+              </button>
 
-          <button
-            type="button"
-            onClick={onOpenSignup}
-            className="cursor-pointer rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[#102a43] transition hover:brightness-95"
-          >
-            {t.nav.signup}
-          </button>
+              <button
+                type="button"
+                onClick={onOpenSignup}
+                className="cursor-pointer rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[#102a43] transition hover:brightness-95"
+              >
+                {t.nav.signup}
+              </button>
+            </>
+          )}
         </div>
       </nav>
     </header>
