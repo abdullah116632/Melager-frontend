@@ -47,7 +47,7 @@ export default function LoginDrawer({
       ).unwrap();
 
       handleClose();
-      router.push("/manager/profile");
+      router.push("/manager");
     } catch {
       // Error is handled by redux state and displayed in UI.
     }

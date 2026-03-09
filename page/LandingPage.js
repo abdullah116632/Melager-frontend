@@ -10,8 +10,11 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import LoginDrawer from "@/components/landing/LoginDrawer";
 import SearchPanel from "@/components/landing/SearchPanel";
+import RequestJoinDrawer from "@/components/landing/RequestJoinDrawer";
+import SearchResultDrawer from "@/components/landing/SearchResultDrawer";
 import SignupDrawer from "@/components/landing/SignupDrawer";
 import VerifyOtpDrawer from "@/components/landing/VerifyOtpDrawer";
+import { searchManagersApi } from "@/services/authApi";
 import { copy, LANGUAGE_KEY } from "@/page/landingCopy";
 
 export default function LandingPage() {
@@ -44,6 +47,13 @@ export default function LandingPage() {
   const [isVerifyOtpDrawerOpen, setIsVerifyOtpDrawerOpen] = useState(false);
   const [signupEmail, setSignupEmail] = useState("");
   const [query, setQuery] = useState("");
+  const [searchBy, setSearchBy] = useState("nameOfMess");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isRequestDrawerOpen, setIsRequestDrawerOpen] = useState(false);
+  const [selectedMessName, setSelectedMessName] = useState("");
 
   const t = useMemo(() => copy[language], [language]);
 
@@ -52,8 +62,70 @@ export default function LandingPage() {
     localStorage.setItem(LANGUAGE_KEY, nextLanguage);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = async (event) => {
     event.preventDefault();
+
+    const value = query.trim();
+
+    if (!value) {
+      setHasSearched(false);
+      setSearchResults([]);
+      setSearchError(null);
+      return;
+    }
+
+    setHasSearched(true);
+
+    const searchParam = { [searchBy]: value };
+
+    try {
+      setIsSearching(true);
+      setSearchError(null);
+
+      const response = await searchManagersApi(searchParam);
+      const managers =
+        response?.data?.managers ||
+        response?.data?.results ||
+        response?.data ||
+        response?.managers ||
+        response?.results ||
+        [];
+
+      setSearchResults(Array.isArray(managers) ? managers : []);
+    } catch (error) {
+      setSearchResults([]);
+      setSearchError(error?.response?.data || error?.message || t.searchFailed);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleQueryChange = (value) => {
+    setQuery(value);
+
+    if (searchError) {
+      setSearchError(null);
+    }
+  };
+
+  const handleSearchByChange = (value) => {
+    setSearchBy(value);
+  };
+
+  const handleClearSearchResult = () => {
+    setHasSearched(false);
+    setSearchResults([]);
+    setSearchError(null);
+  };
+
+  const handleOpenRequestDrawer = (manager) => {
+    setSelectedMessName(manager?.nameOfMess || manager?.messName || "");
+    setIsRequestDrawerOpen(true);
+  };
+
+  const handleCloseRequestDrawer = () => {
+    setIsRequestDrawerOpen(false);
+    setSelectedMessName("");
   };
 
   return (
@@ -82,10 +154,31 @@ export default function LandingPage() {
         <SearchPanel
           t={t}
           query={query}
-          onQueryChange={setQuery}
+          searchBy={searchBy}
+          onQueryChange={handleQueryChange}
+          onSearchByChange={handleSearchByChange}
           onSearch={handleSearch}
+          isSearching={isSearching}
+          hasSearched={hasSearched}
         />
       </main>
+
+      <SearchResultDrawer
+        isOpen={hasSearched}
+        t={t}
+        isSearching={isSearching}
+        searchError={searchError}
+        searchResults={searchResults}
+        onClose={handleClearSearchResult}
+        onOpenRequest={handleOpenRequestDrawer}
+      />
+
+      <RequestJoinDrawer
+        isOpen={isRequestDrawerOpen}
+        t={t}
+        messName={selectedMessName}
+        onClose={handleCloseRequestDrawer}
+      />
 
       <AdvantagesSection t={t} />
 
@@ -107,7 +200,7 @@ export default function LandingPage() {
             setIsVerifyOtpDrawerOpen(false);
             setIsLoginDrawerOpen(false);
             setIsForgotDrawerOpen(false);
-            router.push("/manager/profile");
+            router.push("/manager");
             return;
           }
 
@@ -127,7 +220,7 @@ export default function LandingPage() {
           setIsSignupDrawerOpen(false);
           setIsLoginDrawerOpen(false);
           setIsForgotDrawerOpen(false);
-          router.push("/manager/profile");
+          router.push("/manager");
         }}
         onBackToSignup={() => {
           setIsVerifyOtpDrawerOpen(false);
