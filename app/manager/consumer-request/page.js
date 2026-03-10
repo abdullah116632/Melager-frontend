@@ -1,19 +1,31 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 import {
   acceptConsumerRequest,
   fetchManagerConsumerRequests,
+  rejectConsumerRequest,
 } from "@/store/slices/consumerRequestSlice";
 
 export default function ManagerConsumerRequestPage() {
   const { language, t } = useLandingLanguage();
   const dispatch = useDispatch();
-  const { requests, isLoading, error, acceptLoadingById, acceptErrorById } = useSelector(
-    (state) => state.consumerRequest
-  );
+  const [confirmation, setConfirmation] = useState({
+    isOpen: false,
+    requestId: null,
+    action: null,
+  });
+  const {
+    requests,
+    isLoading,
+    error,
+    acceptLoadingById,
+    acceptErrorById,
+    rejectLoadingById,
+    rejectErrorById,
+  } = useSelector((state) => state.consumerRequest);
 
   useEffect(() => {
     dispatch(fetchManagerConsumerRequests());
@@ -33,10 +45,52 @@ export default function ManagerConsumerRequestPage() {
     }
   };
 
-  const handleRejectRequest = (requestId) => {
-    // TODO: Wire reject API call here.
-    console.log("Reject request", requestId);
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await dispatch(rejectConsumerRequest(requestId)).unwrap();
+    } catch {
+      // Per-request error is displayed from redux state.
+    }
   };
+
+  const openConfirmation = (action, requestId) => {
+    setConfirmation({ isOpen: true, requestId, action });
+  };
+
+  const closeConfirmation = () => {
+    setConfirmation({ isOpen: false, requestId: null, action: null });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmation.requestId || !confirmation.action) {
+      closeConfirmation();
+      return;
+    }
+
+    if (confirmation.action === "accept") {
+      await handleAcceptRequest(confirmation.requestId);
+    }
+
+    if (confirmation.action === "reject") {
+      await handleRejectRequest(confirmation.requestId);
+    }
+
+    closeConfirmation();
+  };
+
+  const isConfirming =
+    confirmation.action === "accept"
+      ? Boolean(acceptLoadingById[confirmation.requestId])
+      : Boolean(rejectLoadingById[confirmation.requestId]);
+
+  const confirmationTitle =
+    confirmation.action === "accept"
+      ? t.managerConsumerRequestConfirmAcceptTitle
+      : t.managerConsumerRequestConfirmRejectTitle;
+  const confirmationDescription =
+    confirmation.action === "accept"
+      ? t.managerConsumerRequestConfirmAcceptDescription
+      : t.managerConsumerRequestConfirmRejectDescription;
 
   return (
     <main className={`mx-auto min-h-screen w-full max-w-5xl px-4 py-10 md:px-8 ${language === "bn" ? "font-bn" : ""}`}>
@@ -72,6 +126,8 @@ export default function ManagerConsumerRequestPage() {
             const statusClassName = statusClassMap[status] || statusClassMap.pending;
             const isAccepting = Boolean(acceptLoadingById[id]);
             const acceptError = acceptErrorById[id];
+            const isRejecting = Boolean(rejectLoadingById[id]);
+            const rejectError = rejectErrorById[id];
 
             return (
               <article key={id} className="rounded-2xl border border-[#102a4322] bg-white p-5 shadow-sm">
@@ -98,18 +154,19 @@ export default function ManagerConsumerRequestPage() {
                 <div className="mt-4 flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => handleAcceptRequest(id)}
+                    onClick={() => openConfirmation("accept", id)}
                     disabled={isAccepting || status === "accepted"}
                     className="cursor-pointer rounded-lg border border-[#0a7a4c] bg-[#e8f8ef] px-3 py-1.5 text-xs font-semibold text-[#0a5a39] transition hover:bg-[#d9f2e3] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {isAccepting ? "Accepting..." : "Accept"}
+                    {isAccepting ? t.managerConsumerRequestAccepting : t.managerConsumerRequestAccept}
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleRejectRequest(id)}
-                    className="cursor-pointer rounded-lg border border-[#c53030] bg-[#ffecec] px-3 py-1.5 text-xs font-semibold text-[#8f1d1d] transition hover:bg-[#ffdede]"
+                    onClick={() => openConfirmation("reject", id)}
+                    disabled={isRejecting || status === "rejected"}
+                    className="cursor-pointer rounded-lg border border-[#c53030] bg-[#ffecec] px-3 py-1.5 text-xs font-semibold text-[#8f1d1d] transition hover:bg-[#ffdede] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Reject
+                    {isRejecting ? t.managerConsumerRequestRejecting : t.managerConsumerRequestReject}
                   </button>
                 </div>
 
@@ -118,10 +175,54 @@ export default function ManagerConsumerRequestPage() {
                     {acceptError}
                   </p>
                 ) : null}
+
+                {rejectError ? (
+                  <p className="mt-2 rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700">
+                    {rejectError}
+                  </p>
+                ) : null}
               </article>
             );
           })}
         </section>
+      ) : null}
+
+      {confirmation.isOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <h2 className="text-base font-bold text-[var(--color-ink)]">{confirmationTitle}</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{confirmationDescription}</p>
+
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeConfirmation}
+                disabled={isConfirming}
+                className="cursor-pointer rounded-lg border border-[#d9e2ec] px-3 py-1.5 text-xs font-semibold text-[var(--color-ink)] transition hover:bg-[#f5f7fa] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {t.managerConsumerRequestConfirmCancel}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAction}
+                disabled={isConfirming}
+                className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                  confirmation.action === "accept"
+                    ? "bg-[#0a7a4c] hover:bg-[#08653f]"
+                    : "bg-[#c53030] hover:bg-[#a42828]"
+                }`}
+              >
+                {isConfirming
+                  ? confirmation.action === "accept"
+                    ? t.managerConsumerRequestAccepting
+                    : t.managerConsumerRequestRejecting
+                  : confirmation.action === "accept"
+                    ? t.managerConsumerRequestConfirmAcceptButton
+                    : t.managerConsumerRequestConfirmRejectButton}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </main>
   );

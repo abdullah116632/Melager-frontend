@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   acceptConsumerRequestApi,
   getManagerConsumerRequestsByIdApi,
+  rejectConsumerRequestApi,
 } from "@/services/consumerRequestService";
 
 const initialState = {
@@ -10,6 +11,8 @@ const initialState = {
   error: null,
   acceptLoadingById: {},
   acceptErrorById: {},
+  rejectLoadingById: {},
+  rejectErrorById: {},
 };
 
 function decodeManagerIdFromToken(token) {
@@ -83,6 +86,29 @@ export const acceptConsumerRequest = createAsyncThunk(
   }
 );
 
+export const rejectConsumerRequest = createAsyncThunk(
+  "consumerRequest/rejectConsumerRequest",
+  async (requestId, { rejectWithValue }) => {
+    try {
+      const response = await rejectConsumerRequestApi(requestId);
+      const request = response?.data?.request || response?.request || null;
+
+      if (!request) {
+        return rejectWithValue("Request update response is invalid.");
+      }
+
+      return request;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to reject request."
+      );
+    }
+  }
+);
+
 const consumerRequestSlice = createSlice({
   name: "consumerRequest",
   initialState,
@@ -136,6 +162,40 @@ const consumerRequestSlice = createSlice({
         const requestId = action.meta.arg;
         state.acceptLoadingById[requestId] = false;
         state.acceptErrorById[requestId] = action.payload || "Failed to accept request.";
+      })
+      .addCase(rejectConsumerRequest.pending, (state, action) => {
+        const requestId = action.meta.arg;
+        state.rejectLoadingById[requestId] = true;
+        delete state.rejectErrorById[requestId];
+      })
+      .addCase(rejectConsumerRequest.fulfilled, (state, action) => {
+        const updatedRequest = action.payload;
+        const requestId = updatedRequest?.id || updatedRequest?._id;
+
+        if (!requestId) {
+          return;
+        }
+
+        state.rejectLoadingById[requestId] = false;
+        delete state.rejectErrorById[requestId];
+
+        const index = state.requests.findIndex((item) => {
+          const id = item?.id || item?._id;
+          return String(id) === String(requestId);
+        });
+
+        if (index >= 0) {
+          state.requests[index] = {
+            ...state.requests[index],
+            status: updatedRequest.status || "rejected",
+            reviewedAt: updatedRequest.reviewedAt || state.requests[index].reviewedAt,
+          };
+        }
+      })
+      .addCase(rejectConsumerRequest.rejected, (state, action) => {
+        const requestId = action.meta.arg;
+        state.rejectLoadingById[requestId] = false;
+        state.rejectErrorById[requestId] = action.payload || "Failed to reject request.";
       });
   },
 });
