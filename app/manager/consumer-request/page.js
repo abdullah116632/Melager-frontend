@@ -3,12 +3,17 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
-import { fetchManagerConsumerRequests } from "@/store/slices/consumerRequestSlice";
+import {
+  acceptConsumerRequest,
+  fetchManagerConsumerRequests,
+} from "@/store/slices/consumerRequestSlice";
 
 export default function ManagerConsumerRequestPage() {
   const { language, t } = useLandingLanguage();
   const dispatch = useDispatch();
-  const { requests, isLoading, error } = useSelector((state) => state.consumerRequest);
+  const { requests, isLoading, error, acceptLoadingById, acceptErrorById } = useSelector(
+    (state) => state.consumerRequest
+  );
 
   useEffect(() => {
     dispatch(fetchManagerConsumerRequests());
@@ -18,6 +23,19 @@ export default function ManagerConsumerRequestPage() {
     pending: "border-[#d69e2e] bg-[#fff8e1] text-[#8a5d00]",
     accepted: "border-[#0a7a4c] bg-[#e8f8ef] text-[#0a5a39]",
     rejected: "border-[#c53030] bg-[#ffecec] text-[#8f1d1d]",
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      await dispatch(acceptConsumerRequest(requestId)).unwrap();
+    } catch {
+      // Per-request error is displayed from redux state.
+    }
+  };
+
+  const handleRejectRequest = (requestId) => {
+    // TODO: Wire reject API call here.
+    console.log("Reject request", requestId);
   };
 
   return (
@@ -52,6 +70,8 @@ export default function ManagerConsumerRequestPage() {
             const consumer = request?.consumer || {};
             const status = (request?.status || "pending").toLowerCase();
             const statusClassName = statusClassMap[status] || statusClassMap.pending;
+            const isAccepting = Boolean(acceptLoadingById[id]);
+            const acceptError = acceptErrorById[id];
 
             return (
               <article key={id} className="rounded-2xl border border-[#102a4322] bg-white p-5 shadow-sm">
@@ -74,6 +94,30 @@ export default function ManagerConsumerRequestPage() {
                 <p className="mt-1 text-xs text-[var(--color-muted)]">
                   {t.managerConsumerRequestReviewedLabel}: {request?.reviewedAt ? new Date(request.reviewedAt).toLocaleString() : "-"}
                 </p>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleAcceptRequest(id)}
+                    disabled={isAccepting || status === "accepted"}
+                    className="cursor-pointer rounded-lg border border-[#0a7a4c] bg-[#e8f8ef] px-3 py-1.5 text-xs font-semibold text-[#0a5a39] transition hover:bg-[#d9f2e3] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isAccepting ? "Accepting..." : "Accept"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRejectRequest(id)}
+                    className="cursor-pointer rounded-lg border border-[#c53030] bg-[#ffecec] px-3 py-1.5 text-xs font-semibold text-[#8f1d1d] transition hover:bg-[#ffdede]"
+                  >
+                    Reject
+                  </button>
+                </div>
+
+                {acceptError ? (
+                  <p className="mt-2 rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700">
+                    {acceptError}
+                  </p>
+                ) : null}
               </article>
             );
           })}
