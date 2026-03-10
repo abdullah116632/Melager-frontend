@@ -1,18 +1,33 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { FiUser } from "react-icons/fi";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
 export default function ManagerNavbar() {
   const { language, t, handleLanguage } = useLandingLanguage();
+  const pathname = usePathname();
 
   const navLinks = [
     { label: t.managerNavDashboard, href: "/manager" },
     { label: t.managerNavMembers, href: "/manager/consumers" },
+    { label: t.managerNavMemberRequest, href: "/manager/consumer-request" },
     { label: t.managerNavMeals, href: "#" },
   ];
+
+  const isActiveLink = (href) => {
+    if (!href || href === "#") {
+      return false;
+    }
+
+    if (href === "/manager") {
+      return pathname === "/manager";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <header className="relative z-20 border-b border-[#102a4315] bg-[#fdf8efcf] backdrop-blur-sm">
@@ -64,7 +79,11 @@ export default function ManagerNavbar() {
             <Link
               key={item.label}
               href={item.href}
-              className="inline-flex min-w-[96px] justify-center rounded-full border border-[#102a4325] bg-white px-3 py-1.5 text-center transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-strong)]"
+              className={`inline-flex min-w-[96px] justify-center rounded-full border px-3 py-1.5 text-center transition ${
+                isActiveLink(item.href)
+                  ? "border-[#083f3a] bg-[#0b5e57] text-[#f1fffd]"
+                  : "border-[#102a4325] bg-white hover:border-[var(--color-brand)] hover:text-[var(--color-brand-strong)]"
+              }`}
             >
               {item.label}
             </Link>
@@ -72,7 +91,11 @@ export default function ManagerNavbar() {
 
           <Link
             href="/manager/profile"
-            className="grid h-10 w-10 place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+            className={`grid h-10 w-10 place-items-center rounded-full border transition ${
+              isActiveLink("/manager/profile")
+                ? "border-[#083f3a] bg-[#0b5e57] text-[#f1fffd]"
+                : "border-[#102a4325] bg-white text-[var(--color-brand-strong)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+            }`}
             aria-label={t.managerNavProfile}
           >
             <FiUser size={18} />
