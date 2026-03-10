@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getConsumerRequestByIdsApi, loadConsumerSessionApi } from "@/services/consumerService";
+import { getMessMembershipByIdsApi, loadConsumerSessionApi } from "@/services/consumerService";
 
 const CONSUMER_SESSION_STORAGE_KEY = "consumerSessionData";
 
@@ -51,7 +51,7 @@ export const submitConsumerAccess = createAsyncThunk(
         return rejectWithValue(accessFailedMessage || "Access failed.");
       }
 
-      const requestResponse = await getConsumerRequestByIdsApi({
+      const requestResponse = await getMessMembershipByIdsApi({
         consumerId,
         managerId,
       });

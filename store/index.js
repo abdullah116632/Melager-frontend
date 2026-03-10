@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/store/slices/authSlice";
 import consumerReducer from "@/store/slices/consumerSlice";
 import drawerReducer from "@/store/slices/drawerSlice";
+import messMemberReducer from "@/store/slices/messMemberSlice";
 import managerSearchReducer from "@/store/slices/managerSearchSlice";
 
 const store = configureStore({
@@ -9,6 +10,7 @@ const store = configureStore({
     auth: authReducer,
     consumer: consumerReducer,
     drawer: drawerReducer,
+    messMember: messMemberReducer,
     managerSearch: managerSearchReducer,
   },
   devTools: process.env.NODE_ENV !== "production",

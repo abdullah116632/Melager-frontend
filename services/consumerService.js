@@ -21,9 +21,8 @@ export async function getMyConsumerRequestsToMessApi() {
   return data;
 }
 
-
-export async function getConsumerRequestByIdsApi({ consumerId, managerId }) {
-  const { data } = await axiosClient.get("/consumer/request", {
+export async function getMessMembershipByIdsApi({ consumerId, managerId }) {
+  const { data } = await axiosClient.get("/consumer/membership", {
     params: {
       consumerId,
       managerId,
