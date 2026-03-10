@@ -4,12 +4,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
-import { fetchMyMesses } from "@/store/slices/messMemberSlice";
+import { fetchMyMesses } from "@/store/slices/managerMemberSlice";
 
 export default function MessesPage() {
   const dispatch = useDispatch();
   const { language, t } = useLandingLanguage();
-  const { messes, isLoading, error } = useSelector((state) => state.messMember);
+  const { managers, isLoading, error } = useSelector((state) => state.messMember);
 
   useEffect(() => {
     dispatch(fetchMyMesses());
@@ -44,15 +44,15 @@ export default function MessesPage() {
         </div>
       ) : null}
 
-      {!isLoading && !error && messes.length === 0 ? (
+      {!isLoading && !error && managers.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-[#0b5e5730] bg-[#edf8f7] p-5 text-sm text-[var(--color-muted)]">
           {t.messesEmptyMembership}
         </div>
       ) : null}
 
-      {!isLoading && !error && messes.length > 0 ? (
+      {!isLoading && !error && managers.length > 0 ? (
         <section className="mt-6 space-y-3">
-          {messes.map((membership, index) => {
+          {managers.map((membership, index) => {
             const id = membership?.id || membership?._id || index;
             const manager = membership?.manager || {};
             const joinedAt = membership?.joinedAt;
