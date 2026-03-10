@@ -16,3 +16,8 @@ export async function getManagerMembersByIdApi(managerId) {
   const { data } = await axiosClient.get(`/manager/${managerId}/members`);
   return data;
 }
+
+export async function addMemberToManagerApi(payload) {
+  const { data } = await axiosClient.post("/manager/consumers", payload);
+  return data;
+}

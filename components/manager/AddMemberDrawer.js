@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addManagerMember,
+  clearAddMemberStatus,
+  fetchManagerMembers,
+} from "@/store/slices/managerMemberSlice";
 
 const initialForm = {
   name: "",
   email: "",
   phnNumber: "",
-  note: "",
 };
 
 export default function AddMemberDrawer({ isOpen, onClose }) {
+  const dispatch = useDispatch();
+  const { addMemberLoading, addMemberError, addMemberSuccess } = useSelector(
+    (state) => state.messMember
+  );
   const [formData, setFormData] = useState(initialForm);
 
   const handleChange = (event) => {
@@ -18,16 +27,37 @@ export default function AddMemberDrawer({ isOpen, onClose }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    try {
+      await dispatch(
+        addManagerMember({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phnNumber: formData.phnNumber.trim(),
+        })
+      ).unwrap();
+
+      dispatch(fetchManagerMembers());
+      setFormData(initialForm);
+      onClose();
+    } catch {
+      // Error is displayed from redux state.
+    }
+  };
+
+  const handleClose = () => {
+    dispatch(clearAddMemberStatus());
     setFormData(initialForm);
     onClose();
   };
 
-  const handleClose = () => {
-    setFormData(initialForm);
-    onClose();
-  };
+  useEffect(() => {
+    if (!isOpen) {
+      dispatch(clearAddMemberStatus());
+    }
+  }, [dispatch, isOpen]);
 
   return (
     <>
@@ -68,6 +98,7 @@ export default function AddMemberDrawer({ isOpen, onClose }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              disabled={addMemberLoading}
               required
               className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
               placeholder="Enter full name"
@@ -81,6 +112,7 @@ export default function AddMemberDrawer({ isOpen, onClose }) {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              disabled={addMemberLoading}
               required
               className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
               placeholder="Enter email"
@@ -94,29 +126,31 @@ export default function AddMemberDrawer({ isOpen, onClose }) {
               name="phnNumber"
               value={formData.phnNumber}
               onChange={handleChange}
+              disabled={addMemberLoading}
               required
               className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
               placeholder="01XXXXXXXXX"
             />
           </label>
 
-          <label className="block text-sm">
-            <span className="mb-1 block text-[var(--color-muted)]">Note (optional)</span>
-            <textarea
-              name="note"
-              value={formData.note}
-              onChange={handleChange}
-              rows={3}
-              className="w-full rounded-xl border border-[#102a4325] bg-white px-3 py-2.5 outline-none transition focus:border-[var(--color-brand)]"
-              placeholder="Write a short note"
-            />
-          </label>
+          {addMemberError ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {addMemberError}
+            </p>
+          ) : null}
+
+          {addMemberSuccess ? (
+            <p className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+              {addMemberSuccess}
+            </p>
+          ) : null}
 
           <button
             type="submit"
-            className="mt-2 w-full cursor-pointer rounded-xl bg-[var(--color-brand)] px-4 py-3 font-semibold text-white transition hover:bg-[var(--color-brand-strong)]"
+            disabled={addMemberLoading}
+            className="mt-2 w-full cursor-pointer rounded-xl bg-[var(--color-brand)] px-4 py-3 font-semibold text-white transition hover:bg-[var(--color-brand-strong)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Add Member
+            {addMemberLoading ? "Adding..." : "Add Member"}
           </button>
         </form>
       </aside>

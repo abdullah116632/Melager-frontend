@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getMyMessesApi } from "@/services/messMemberService";
-import { getManagerMembersByIdApi } from "@/services/managerService";
+import { addMemberToManagerApi, getManagerMembersByIdApi } from "@/services/managerService";
 
 const initialState = {
   managers: [],
@@ -9,6 +9,9 @@ const initialState = {
   members: [],
   membersLoading: false,
   membersError: null,
+  addMemberLoading: false,
+  addMemberError: null,
+  addMemberSuccess: null,
 };
 
 function decodeManagerIdFromToken(token) {
@@ -77,10 +80,42 @@ export const fetchManagerMembers = createAsyncThunk(
   }
 );
 
+export const addManagerMember = createAsyncThunk(
+  "messMember/addManagerMember",
+  async ({ name, email, phnNumber }, { rejectWithValue }) => {
+    try {
+      const response = await addMemberToManagerApi({ name, email, phnNumber });
+      const consumer = response?.data?.consumer || response?.consumer || null;
+      const membership = response?.data?.membership || response?.membership || null;
+
+      return {
+        member: {
+          id: membership?.id || membership?._id || consumer?.id || consumer?._id,
+          consumer,
+          joinedAt: membership?.joinedAt || null,
+          isActive: membership?.isActive ?? true,
+        },
+      };
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to add member."
+      );
+    }
+  }
+);
+
 const managerMemberSlice = createSlice({
   name: "messMember",
   initialState,
-  reducers: {},
+  reducers: {
+    clearAddMemberStatus: (state) => {
+      state.addMemberError = null;
+      state.addMemberSuccess = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMyMesses.pending, (state) => {
@@ -110,8 +145,46 @@ const managerMemberSlice = createSlice({
         state.membersLoading = false;
         state.members = [];
         state.membersError = action.payload || "Failed to load members.";
+      })
+      .addCase(addManagerMember.pending, (state) => {
+        state.addMemberLoading = true;
+        state.addMemberError = null;
+        state.addMemberSuccess = null;
+      })
+      .addCase(addManagerMember.fulfilled, (state, action) => {
+        state.addMemberLoading = false;
+        state.addMemberError = null;
+        state.addMemberSuccess = "Member added successfully.";
+
+        const addedMember = action.payload?.member;
+
+        if (!addedMember?.consumer) {
+          return;
+        }
+
+        const addedConsumerId = addedMember.consumer?.id || addedMember.consumer?._id;
+        const existingIndex = state.members.findIndex((item) => {
+          const existingConsumerId = item?.consumer?.id || item?.consumer?._id;
+          return String(existingConsumerId) === String(addedConsumerId);
+        });
+
+        if (existingIndex >= 0) {
+          state.members[existingIndex] = {
+            ...state.members[existingIndex],
+            ...addedMember,
+          };
+        } else {
+          state.members.unshift(addedMember);
+        }
+      })
+      .addCase(addManagerMember.rejected, (state, action) => {
+        state.addMemberLoading = false;
+        state.addMemberSuccess = null;
+        state.addMemberError = action.payload || "Failed to add member.";
       });
   },
 });
+
+export const { clearAddMemberStatus } = managerMemberSlice.actions;
 
 export default managerMemberSlice.reducer;

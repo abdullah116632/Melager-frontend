@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { FiUser } from "react-icons/fi";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
 export default function ManagerNavbar() {
@@ -9,7 +10,6 @@ export default function ManagerNavbar() {
 
   const navLinks = [
     { label: t.managerNavDashboard, href: "/manager" },
-    { label: t.managerNavProfile, href: "/manager/profile" },
     { label: t.managerNavMembers, href: "/manager/consumers" },
     { label: t.managerNavMeals, href: "#" },
   ];
@@ -69,6 +69,14 @@ export default function ManagerNavbar() {
               {item.label}
             </Link>
           ))}
+
+          <Link
+            href="/manager/profile"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+            aria-label={t.managerNavProfile}
+          >
+            <FiUser size={18} />
+          </Link>
         </div>
       </nav>
     </header>
