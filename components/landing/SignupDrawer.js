@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import ApiErrorAlert from "@/components/common/ApiErrorAlert";
@@ -9,15 +10,18 @@ import {
   clearAuthStatus,
   registerUser,
 } from "@/store/slices/authSlice";
+import {
+  closeSignupDrawer,
+  handleSignupSuccessUi,
+  openLoginDrawer,
+} from "@/store/slices/drawerSlice";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
-export default function SignupDrawer({
-  isOpen,
-  t,
-  onClose,
-  onOpenLogin,
-  onSignupSuccess,
-}) {
+export default function SignupDrawer() {
+  const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useLandingLanguage();
+  const isSignupDrawerOpen = useSelector((state) => state.drawer.isSignupDrawerOpen);
   const { isLoading, error, registrationMessage } = useSelector((state) => state.auth);
   const apiErrorRef = useRef(null);
 
@@ -97,12 +101,15 @@ export default function SignupDrawer({
         })
       ).unwrap();
 
-      if (onSignupSuccess) {
-        onSignupSuccess({
+      dispatch(
+        handleSignupSuccessUi({
           email: result?.email || formData.email.trim(),
-          message: result?.message || "",
           token: result?.token || null,
-        });
+        })
+      );
+
+      if (result?.token) {
+        router.push("/manager");
       }
     } catch {
       // Error is handled by redux state and displayed in UI.
@@ -111,12 +118,12 @@ export default function SignupDrawer({
 
   const handleClose = () => {
     dispatch(clearAuthStatus());
-    onClose();
+    dispatch(closeSignupDrawer());
   };
 
   const handleOpenLogin = () => {
     dispatch(clearAuthStatus());
-    onOpenLogin();
+    dispatch(openLoginDrawer());
   };
 
   useEffect(() => {
@@ -130,13 +137,13 @@ export default function SignupDrawer({
       <div
         onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a4360] transition ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          isSignupDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
         className={`fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-[#102a431a] bg-[var(--color-paper)] p-6 shadow-2xl transition-transform duration-300 ease-out md:p-8 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isSignupDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-start justify-between gap-3">

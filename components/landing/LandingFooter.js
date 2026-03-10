@@ -15,10 +15,12 @@ import {
   FiSend,
   FiX,
 } from "react-icons/fi";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
 const socialIcons = [FiFacebook, FiInstagram, FiLinkedin];
 
-export default function LandingFooter({ t }) {
+export default function LandingFooter() {
+  const { t } = useLandingLanguage();
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
 
   return (

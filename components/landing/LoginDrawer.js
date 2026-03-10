@@ -5,34 +5,36 @@ import { FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import ApiErrorAlert from "@/components/common/ApiErrorAlert";
-import { clearAuthError, clearAuthStatus, loginUser } from "@/store/slices/authSlice";
+import {
+  clearAuthError,
+  clearAuthStatus,
+  loginUser,
+} from "@/store/slices/authSlice";
+import { closeLoginDrawer, openForgotDrawer, openSignupDrawer } from "@/store/slices/drawerSlice";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
-export default function LoginDrawer({
-  isOpen,
-  t,
-  onClose,
-  onOpenForgotPassword,
-  onOpenSignup,
-}) {
+export default function LoginDrawer() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const isLoginDrawerOpen = useSelector((state) => state.drawer.isLoginDrawerOpen);
   const { isLoading, error } = useSelector((state) => state.auth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleClose = () => {
     dispatch(clearAuthStatus());
-    onClose();
+    dispatch(closeLoginDrawer());
   };
 
   const handleOpenSignup = () => {
     dispatch(clearAuthStatus());
-    onOpenSignup();
+    dispatch(openSignupDrawer());
   };
 
   const handleForgotPassword = () => {
     dispatch(clearAuthStatus());
-    onOpenForgotPassword();
+    dispatch(openForgotDrawer());
   };
 
   const handleLoginSubmit = async (event) => {
@@ -74,13 +76,13 @@ export default function LoginDrawer({
       <div
         onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a4360] transition ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          isLoginDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
         className={`fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-[#102a431a] bg-[var(--color-paper)] p-6 shadow-2xl transition-transform duration-300 ease-out md:p-8 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isLoginDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-start justify-between gap-3">

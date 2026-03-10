@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiRefreshCw, FiX } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,26 +10,28 @@ import {
   resendRegistrationOtp,
   verifyRegistrationOtp,
 } from "@/store/slices/authSlice";
+import {
+  backToSignupFromVerify,
+  closeVerifyOtpDrawer,
+  handleVerifySuccessUi,
+} from "@/store/slices/drawerSlice";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
-export default function VerifyOtpDrawer({
-  isOpen,
-  t,
-  onClose,
-  defaultEmail,
-  onBackToSignup,
-  onVerifySuccess,
-}) {
+export default function VerifyOtpDrawer() {
+  const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useLandingLanguage();
+  const { isVerifyOtpDrawerOpen, signupEmail } = useSelector((state) => state.drawer);
   const { isLoading, error, registrationMessage, verifySuccessMessage } = useSelector(
     (state) => state.auth
   );
 
-  const [email, setEmail] = useState(defaultEmail || "");
+  const [email, setEmail] = useState(signupEmail || "");
   const [otp, setOtp] = useState("");
 
   useEffect(() => {
-    setEmail(defaultEmail || "");
-  }, [defaultEmail]);
+    setEmail(signupEmail || "");
+  }, [signupEmail]);
 
   const handleVerifySubmit = async (event) => {
     event.preventDefault();
@@ -46,12 +49,8 @@ export default function VerifyOtpDrawer({
       ).unwrap();
 
       setOtp("");
-
-      if (onVerifySuccess) {
-        onVerifySuccess();
-      } else {
-        onClose();
-      }
+      dispatch(handleVerifySuccessUi());
+      router.push("/manager");
     } catch {
       // Error is shown from redux state.
     }
@@ -75,12 +74,12 @@ export default function VerifyOtpDrawer({
 
   const handleClose = () => {
     dispatch(clearAuthStatus());
-    onClose();
+    dispatch(closeVerifyOtpDrawer());
   };
 
   const handleBackToSignup = () => {
     dispatch(clearAuthStatus());
-    onBackToSignup();
+    dispatch(backToSignupFromVerify());
   };
 
   return (
@@ -88,13 +87,13 @@ export default function VerifyOtpDrawer({
       <div
         onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a4360] transition ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          isVerifyOtpDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
         className={`fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-[#102a431a] bg-[var(--color-paper)] p-6 shadow-2xl transition-transform duration-300 ease-out md:p-8 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isVerifyOtpDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-start justify-between gap-3">

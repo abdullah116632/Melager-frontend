@@ -1,15 +1,18 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FiUser } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
+import { openLoginDrawer, openSignupDrawer } from "@/store/slices/drawerSlice";
 
-export default function LandingNavbar({
-  t,
-  language,
-  isAuthenticated,
-  onLanguageChange,
-  onOpenLogin,
-  onOpenSignup,
-}) {
+export default function LandingNavbar() {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const hasConsumerSession = useSelector((state) => state.consumer.hasConsumerSession);
+  const { hasMounted, language, t, handleLanguage } = useLandingLanguage();
+
   return (
     <header className="relative z-10 border-b border-[#102a4315] bg-[#fdf8efc9] backdrop-blur-sm">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-8">
@@ -48,7 +51,7 @@ export default function LandingNavbar({
           <div className="chip flex items-center rounded-full p-1 text-xs">
             <button
               type="button"
-              onClick={() => onLanguageChange("bn")}
+              onClick={() => handleLanguage("bn")}
               className={`rounded-full px-3 py-1.5 transition ${
                 language === "bn"
                   ? "cursor-pointer bg-[var(--color-brand)] text-white"
@@ -59,7 +62,7 @@ export default function LandingNavbar({
             </button>
             <button
               type="button"
-              onClick={() => onLanguageChange("en")}
+              onClick={() => handleLanguage("en")}
               className={`rounded-full px-3 py-1.5 transition ${
                 language === "en"
                   ? "cursor-pointer bg-[var(--color-brand)] text-white"
@@ -70,7 +73,16 @@ export default function LandingNavbar({
             </button>
           </div>
 
-          {isAuthenticated ? (
+          {hasConsumerSession ? (
+            <Link
+              href="/messes"
+              className="cursor-pointer rounded-full border border-[#102a4325] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)]"
+            >
+              {t.nav.myScore}
+            </Link>
+          ) : null}
+
+          {hasMounted && isAuthenticated ? (
             <Link
               href="/manager/profile"
               className="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
@@ -82,7 +94,7 @@ export default function LandingNavbar({
             <>
               <button
                 type="button"
-                onClick={onOpenLogin}
+                onClick={() => dispatch(openLoginDrawer())}
                 className="hidden cursor-pointer rounded-full border border-[#102a4325] px-4 py-2 text-sm font-semibold text-[var(--color-brand-strong)] transition hover:bg-white/70 sm:block"
               >
                 {t.nav.login}
@@ -90,7 +102,7 @@ export default function LandingNavbar({
 
               <button
                 type="button"
-                onClick={onOpenSignup}
+                onClick={() => dispatch(openSignupDrawer())}
                 className="cursor-pointer rounded-full bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-[#102a43] transition hover:brightness-95"
               >
                 {t.nav.signup}

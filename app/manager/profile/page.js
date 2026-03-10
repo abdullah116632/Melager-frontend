@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import ApiErrorAlert from "@/components/common/ApiErrorAlert";
-import { getManagerProfileApi } from "@/services/authApi";
+import { getManagerProfileApi } from "@/services/managerService";
 
 export default function ManagerProfilePage() {
   const { user, token } = useSelector((state) => state.auth);

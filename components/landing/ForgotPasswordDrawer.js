@@ -1,18 +1,38 @@
-import { FiMail, FiX } from "react-icons/fi";
+"use client";
 
-export default function ForgotPasswordDrawer({ isOpen, t, onClose, onBackToLogin }) {
+import { FiMail, FiX } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
+import { clearAuthStatus } from "@/store/slices/authSlice";
+import { backToLoginFromForgot, closeForgotDrawer } from "@/store/slices/drawerSlice";
+
+export default function ForgotPasswordDrawer() {
+  const dispatch = useDispatch();
+  const { t } = useLandingLanguage();
+  const { isForgotDrawerOpen } = useSelector((state) => state.drawer);
+
+  const handleClose = () => {
+    dispatch(clearAuthStatus());
+    dispatch(closeForgotDrawer());
+  };
+
+  const handleBackToLogin = () => {
+    dispatch(clearAuthStatus());
+    dispatch(backToLoginFromForgot());
+  };
+
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a4360] transition ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          isForgotDrawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
         className={`fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-[#102a431a] bg-[var(--color-paper)] p-6 shadow-2xl transition-transform duration-300 ease-out md:p-8 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isForgotDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-start justify-between gap-3">
@@ -22,7 +42,7 @@ export default function ForgotPasswordDrawer({ isOpen, t, onClose, onBackToLogin
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={t.close}
             className="grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-[#102a4325] text-[var(--color-muted)] transition hover:bg-white"
           >
@@ -60,7 +80,7 @@ export default function ForgotPasswordDrawer({ isOpen, t, onClose, onBackToLogin
 
           <button
             type="button"
-            onClick={onBackToLogin}
+            onClick={handleBackToLogin}
             className="w-full cursor-pointer rounded-xl border border-[#102a4325] px-4 py-3 text-sm font-medium text-[var(--color-muted)] transition hover:bg-white"
           >
             {t.backToLogin}

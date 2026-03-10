@@ -1,26 +1,34 @@
-import ApiErrorAlert from "@/components/common/ApiErrorAlert";
+"use client";
 
-export default function SearchResultDrawer({
-  isOpen,
-  t,
-  isSearching,
-  searchError,
-  searchResults,
-  onClose,
-  onOpenRequest,
-}) {
+import { useDispatch, useSelector } from "react-redux";
+import ApiErrorAlert from "@/components/common/ApiErrorAlert";
+import { clearSearchResult } from "@/store/slices/managerSearchSlice";
+import { openAccessDrawer, openRequestDrawer } from "@/store/slices/drawerSlice";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
+
+export default function SearchResultDrawer() {
+  const dispatch = useDispatch();
+  const { t } = useLandingLanguage();
+  const { hasSearched, isSearching, searchError, searchResults } = useSelector(
+    (state) => state.managerSearch
+  );
+
+  const handleClose = () => {
+    dispatch(clearSearchResult());
+  };
+
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className={`fixed inset-0 z-30 bg-[#102a435e] transition ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          hasSearched ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
       <aside
         className={`fixed inset-y-0 left-0 z-40 h-full w-full max-w-xl border-r border-[#102a431f] bg-[var(--color-paper)] shadow-2xl transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          hasSearched ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
@@ -28,7 +36,7 @@ export default function SearchResultDrawer({
             <p className="text-sm font-semibold text-[var(--color-ink)]">{t.searchResultsTitle}</p>
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-[#0a4f49] bg-[#0b5e57] text-xs font-bold text-[#f1fffd] transition hover:border-[#083f3a] hover:bg-[#094f49]"
               aria-label={t.searchClose}
             >
@@ -55,6 +63,7 @@ export default function SearchResultDrawer({
               <div className="space-y-2">
                 {searchResults.map((manager, index) => {
                   const id = manager?.id || manager?._id || manager?.email || index;
+                  const managerId = manager?.id || manager?._id || "";
 
                   return (
                     <article
@@ -72,10 +81,18 @@ export default function SearchResultDrawer({
                       </p>
                       <button
                         type="button"
-                        onClick={() => onOpenRequest(manager)}
+                        onClick={() => dispatch(openRequestDrawer(manager))}
                         className="mt-3 w-full cursor-pointer rounded-xl border border-[#d5ece9] bg-[#f7f3ea] px-3 py-2 text-xs font-semibold text-[#0b5e57] transition hover:bg-white"
                       >
                         {t.requestToAdd}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => dispatch(openAccessDrawer(manager))}
+                        className="mt-2 block w-full cursor-pointer rounded-xl border border-[#f7f3ea5e] bg-[#094f49] px-3 py-2 text-center text-xs font-semibold text-[#f7f3ea] transition hover:bg-[#083f3a]"
+                      >
+                        {t.enterDashboard}
                       </button>
                     </article>
                   );

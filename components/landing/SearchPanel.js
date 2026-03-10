@@ -1,30 +1,57 @@
-export default function SearchPanel({
-  t,
-  query,
-  searchBy,
-  onQueryChange,
-  onSearchByChange,
-  onSearch,
-  isSearching,
-  hasSearched,
-}) {
+"use client";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearSearchResult,
+  searchManagers,
+  setSearchBy,
+  setSearchQuery,
+} from "@/store/slices/managerSearchSlice";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
+
+export default function SearchPanel() {
+  const dispatch = useDispatch();
+  const { t } = useLandingLanguage();
+  const { query, searchBy, isSearching, hasSearched } = useSelector(
+    (state) => state.managerSearch
+  );
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+
+    const value = query.trim();
+
+    if (!value) {
+      dispatch(clearSearchResult());
+      return;
+    }
+
+    dispatch(
+      searchManagers({
+        query: value,
+        searchBy,
+        fallbackErrorMessage: t.searchFailed,
+      })
+    );
+  };
+
   return (
     <section className="fade-in-up glass-card rounded-3xl p-6 [animation-delay:120ms] md:p-7">
       <h2 className="text-xl font-bold text-[var(--color-ink)]">{t.searchTitle}</h2>
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t.searchHint}</p>
 
-      <form onSubmit={onSearch} className="mt-5 space-y-4">
+      <form onSubmit={handleSearch} className="mt-5 space-y-4">
         <div className="relative">
           <input
             value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
+            onChange={(event) => dispatch(setSearchQuery(event.target.value))}
             placeholder={t.searchPlaceholder}
             className="w-full rounded-2xl border border-[#102a4326] bg-white px-4 py-3 pr-36 text-sm outline-none transition focus:border-[var(--color-brand)] focus:ring-2 focus:ring-[#0f766e33]"
           />
 
           <select
             value={searchBy}
-            onChange={(event) => onSearchByChange(event.target.value)}
+            onChange={(event) => dispatch(setSearchBy(event.target.value))}
             aria-label={t.searchByLabel}
             className="absolute right-2 top-1/2 w-32 -translate-y-1/2 rounded-xl border border-[#102a4326] bg-[#fffdf9] px-2 py-1.5 text-xs font-semibold text-[var(--color-muted)] outline-none transition focus:border-[var(--color-brand)]"
           >

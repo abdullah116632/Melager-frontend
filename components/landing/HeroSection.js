@@ -1,4 +1,10 @@
-export default function HeroSection({ t }) {
+"use client";
+
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
+
+export default function HeroSection() {
+  const { t } = useLandingLanguage();
+
   return (
     <section className="fade-in-up">
       <span className="chip inline-flex rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide text-[var(--color-brand-strong)]">

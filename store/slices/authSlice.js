@@ -5,7 +5,7 @@ import {
   registerApi,
   resendRegistrationOtpApi,
   verifyRegistrationOtpApi,
-} from "@/services/authApi";
+} from "@/services/authService";
 
 function readToken() {
   if (typeof window === "undefined") {
@@ -282,5 +282,9 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthError, clearAuthStatus, logoutLocal } = authSlice.actions;
+export const {
+  clearAuthError,
+  clearAuthStatus,
+  logoutLocal,
+} = authSlice.actions;
 export default authSlice.reducer;

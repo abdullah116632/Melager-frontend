@@ -1,4 +1,7 @@
+"use client";
+
 import { FiActivity, FiBarChart2, FiCheckCircle, FiLayers, FiUsers } from "react-icons/fi";
+import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 
 const iconMap = {
   activity: FiActivity,
@@ -7,7 +10,9 @@ const iconMap = {
   chart: FiBarChart2,
 };
 
-export default function AdvantagesSection({ t }) {
+export default function AdvantagesSection() {
+  const { t } = useLandingLanguage();
+
   return (
     <section className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-8 md:px-8">
       <div className="rounded-3xl border border-[#102a4322] bg-[#fff8efeb] p-6 shadow-[0_24px_56px_rgba(16,42,67,0.12)] md:p-8">

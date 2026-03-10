@@ -1,9 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/store/slices/authSlice";
+import consumerReducer from "@/store/slices/consumerSlice";
+import drawerReducer from "@/store/slices/drawerSlice";
+import managerSearchReducer from "@/store/slices/managerSearchSlice";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
+    consumer: consumerReducer,
+    drawer: drawerReducer,
+    managerSearch: managerSearchReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
