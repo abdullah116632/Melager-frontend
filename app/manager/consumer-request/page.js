@@ -12,6 +12,8 @@ import {
 export default function ManagerConsumerRequestPage() {
   const { language, t } = useLandingLanguage();
   const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [confirmation, setConfirmation] = useState({
     isOpen: false,
     requestId: null,
@@ -92,12 +94,64 @@ export default function ManagerConsumerRequestPage() {
       ? t.managerConsumerRequestConfirmAcceptDescription
       : t.managerConsumerRequestConfirmRejectDescription;
 
+  const filteredRequests = requests.filter((request) => {
+    const status = (request?.status || "pending").toLowerCase();
+    const matchesStatus = selectedStatus === "all" || status === selectedStatus;
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return matchesStatus;
+    }
+
+    const consumerEmail = String(request?.consumer?.email || "").toLowerCase();
+    const consumerPhone = String(request?.consumer?.phnNumber || "").toLowerCase();
+    const matchesSearch =
+      consumerEmail.includes(normalizedQuery) || consumerPhone.includes(normalizedQuery);
+
+    return matchesStatus && matchesSearch;
+  });
+
   return (
     <main className={`mx-auto min-h-screen w-full max-w-5xl px-4 py-10 md:px-8 ${language === "bn" ? "font-bn" : ""}`}>
-      <h1 className="text-2xl font-bold text-[var(--color-ink)]">{t.managerConsumerRequestTitle}</h1>
-      <p className="mt-2 text-sm text-[var(--color-muted)]">
-        {t.managerConsumerRequestSubtitle}
-      </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-ink)]">{t.managerConsumerRequestTitle}</h1>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            {t.managerConsumerRequestSubtitle}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="sm:min-w-[260px]">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+              {t.managerConsumerRequestSearchLabel}
+            </label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={t.managerConsumerRequestSearchPlaceholder}
+              className="w-full rounded-lg border border-[#d9e2ec] bg-white px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition focus:border-[#102a43]"
+            />
+          </div>
+
+          <div className="sm:min-w-[220px]">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+              {t.managerConsumerRequestFilterLabel}
+            </label>
+            <select
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+              className="cursor-pointer w-full rounded-lg border border-[#d9e2ec] bg-white px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition focus:border-[#102a43]"
+            >
+              <option value="all">{t.managerConsumerRequestFilterAll}</option>
+              <option value="pending">{t.managerConsumerRequestFilterPending}</option>
+              <option value="accepted">{t.managerConsumerRequestFilterAccepted}</option>
+              <option value="rejected">{t.managerConsumerRequestFilterRejected}</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="mt-6 rounded-2xl border border-[#102a4322] bg-white p-6 text-sm text-[var(--color-muted)]">
@@ -111,15 +165,15 @@ export default function ManagerConsumerRequestPage() {
         </div>
       ) : null}
 
-      {!isLoading && !error && requests.length === 0 ? (
+      {!isLoading && !error && filteredRequests.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-[#102a4322] bg-white p-6 text-sm text-[var(--color-muted)]">
           {t.managerConsumerRequestEmpty}
         </div>
       ) : null}
 
-      {!isLoading && !error && requests.length > 0 ? (
+      {!isLoading && !error && filteredRequests.length > 0 ? (
         <section className="mt-6 space-y-3">
-          {requests.map((request, index) => {
+          {filteredRequests.map((request, index) => {
             const id = request?.id || request?._id || index;
             const consumer = request?.consumer || {};
             const status = (request?.status || "pending").toLowerCase();

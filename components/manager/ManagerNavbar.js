@@ -32,7 +32,7 @@ export default function ManagerNavbar() {
   return (
     <header className="relative z-20 border-b border-[#102a4315] bg-[#fdf8efcf] backdrop-blur-sm">
       <nav className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-8">
-        <Link href="/manager" className="flex cursor-pointer items-center gap-3">
+        <Link href="/" className="flex cursor-pointer items-center gap-3">
           <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white">
             <Image
               src="/logo/logo1.png"
