@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FiUser } from "react-icons/fi";
+import { MdAdminPanelSettings } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useLandingLanguage } from "@/hooks/useLandingLanguage";
 import { openLoginDrawer, openSignupDrawer } from "@/store/slices/drawerSlice";
@@ -84,11 +84,14 @@ export default function LandingNavbar() {
 
           {hasMounted && isAuthenticated ? (
             <Link
-              href="/manager/profile"
-              className="grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+              href="/manager"
+              className="relative grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-[#102a4325] bg-white text-[var(--color-brand-strong)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
               aria-label="Go to profile"
             >
-              <FiUser size={18} />
+              <MdAdminPanelSettings size={18} />
+              <span className="absolute -right-3 -top-2 rounded-full bg-[#0b5e57] px-1.5 py-[1px] text-[9px] font-semibold uppercase tracking-wide text-white">
+                Manager
+              </span>
             </Link>
           ) : (
             <>
